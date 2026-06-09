@@ -1,0 +1,20 @@
+# Beginner Pantry Recipes
+
+> Beginner Pantry Recipes is an English recipe generator for beginner cooks. It turns pantry photos and typed ingredients into beginner-safe, step-by-step recipes.
+
+## Core Pages
+
+- / - Recipe Generator From Ingredients You Have
+- /easy-pantry-meals-for-beginners - Easy Pantry Meals for Beginners
+- /recipes-without/oven - Recipes Without an Oven
+- /use-up/leftover-rice - Use Up Leftover Rice Safely
+- /what-can-i-make-with/pantry-staples - What Can I Make With Pantry Staples?
+
+## Safety Sources
+
+- USDA safe minimum internal temperatures
+- FDA leftover and refrigeration safety guidance
+
+## Notes
+
+The MVP has no login, no payment, and no database. Uploaded images and text are used for the current AI request only.
