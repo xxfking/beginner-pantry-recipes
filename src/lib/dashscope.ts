@@ -43,7 +43,15 @@ function getDashScopeConfig() {
   };
 }
 
-export async function callDashScopeJson(messages: ChatMessage[], timeoutMs = 90_000) {
+type DashScopeJsonOptions = {
+  timeoutMs?: number;
+  maxTokens?: number;
+};
+
+export async function callDashScopeJson(
+  messages: ChatMessage[],
+  { timeoutMs = 55_000, maxTokens = 1_400 }: DashScopeJsonOptions = {},
+) {
   const config = getDashScopeConfig();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -59,6 +67,7 @@ export async function callDashScopeJson(messages: ChatMessage[], timeoutMs = 90_
         model: config.model,
         messages,
         temperature: 0.2,
+        max_tokens: maxTokens,
         response_format: { type: "json_object" },
       }),
       signal: controller.signal,

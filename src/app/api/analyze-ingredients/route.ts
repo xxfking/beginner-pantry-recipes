@@ -11,7 +11,7 @@ import {
 import { assertSafeFoodInput } from "@/lib/safety";
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 const ModelAnalysisSchema = z.object({
   ingredients: z.array(IngredientSchema).min(1),
@@ -81,30 +81,33 @@ export async function POST(request: Request) {
       );
     }
 
-    const content = await callDashScopeJson([
-      {
-        role: "system",
-        content:
-          "You identify edible pantry, fridge, and freezer ingredients for a beginner recipe app. Return strict JSON only.",
-      },
-      {
-        role: "user",
-        content: [
-          {
-            type: "text",
-            text:
-              "Analyze this image for edible ingredients only. Exclude packaging text that is not a food item. Mark uncertain or partially hidden items with needsConfirmation=true and confidence below 0.75. Include any manually typed ingredients too. Return JSON with ingredients and notes. Ingredient categories must be one of protein, vegetable, fruit, grain, dairy, pantry, seasoning, leftover, other. Manual text: " +
-              (payload.manualText || "none"),
-          },
-          {
-            type: "image_url",
-            image_url: {
-              url: payload.image.dataUrl,
+    const content = await callDashScopeJson(
+      [
+        {
+          role: "system",
+          content:
+            "Return compact strict JSON only. Identify edible pantry, fridge, and freezer ingredients. Exclude labels, brands, cookware, cleaners, and medicines.",
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text:
+                "Return {ingredients:[{name,category,confidence,source,needsConfirmation}],notes:[string]}. Categories: protein, vegetable, fruit, grain, dairy, pantry, seasoning, leftover, other. Mark uncertain items needsConfirmation=true. Manual text: " +
+                (payload.manualText || "none"),
             },
-          },
-        ],
-      },
-    ]);
+            {
+              type: "image_url",
+              image_url: {
+                url: payload.image.dataUrl,
+              },
+            },
+          ],
+        },
+      ],
+      { timeoutMs: 55_000, maxTokens: 900 },
+    );
 
     const modelResult = parseModelJson(content, ModelAnalysisSchema);
     const ingredients = dedupeIngredients([...manualIngredients, ...modelResult.ingredients]);

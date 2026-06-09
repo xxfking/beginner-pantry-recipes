@@ -10,7 +10,7 @@ import {
 } from "@/lib/safety";
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 function uniqueStrings(values: string[]) {
   return Array.from(new Set(values.map((value) => value.trim()).filter(Boolean)));
@@ -33,50 +33,42 @@ export async function POST(request: Request) {
     }
 
     const fixedSafetyNotes = getFixedSafetyNotes(payload.ingredients);
-    const content = await callDashScopeJson([
-      {
-        role: "system",
-        content:
-          "You are a food safety conscious recipe assistant for beginner home cooks. Return strict JSON only. Never invent unsafe shortcuts. Give concrete visual cues and rescue tips.",
-      },
-      {
-        role: "user",
-        content: JSON.stringify({
-          task:
-            "Create one beginner-friendly recipe using mostly the confirmed ingredients. Keep it practical for a nervous beginner. Use the exact JSON fields requested.",
-          requiredJsonShape: {
-            title: "string",
-            difficulty: "Very easy | Easy | Medium",
-            prepTime: "string",
-            cookTime: "string",
-            usedIngredients: ["string"],
-            optionalStaples: ["string"],
-            missingIngredients: ["string"],
-            steps: [
-              {
-                title: "string",
-                detail: "string",
-                timeMinutes: 0,
-                beginnerCue: "string",
-              },
+    const content = await callDashScopeJson(
+      [
+        {
+          role: "system",
+          content:
+            "Return compact strict JSON only for a beginner recipe. Use simple safety-conscious cooking language.",
+        },
+        {
+          role: "user",
+          content: JSON.stringify({
+            shape: {
+              title: "string",
+              difficulty: "Very easy | Easy | Medium",
+              prepTime: "string",
+              cookTime: "string",
+              usedIngredients: ["string"],
+              optionalStaples: ["string"],
+              missingIngredients: ["string"],
+              steps: [{ title: "string", detail: "string", timeMinutes: 0, beginnerCue: "string" }],
+              safetyNotes: ["string"],
+              substitutions: ["string"],
+              rescueTips: ["string"],
+              storageTips: ["string"],
+            },
+            request: sanitizeRecipeRequestForPrompt(payload),
+            mandatorySafetyNotes: fixedSafetyNotes,
+            rules: [
+              "Use 4 to 6 concise steps.",
+              "Limit optional staples and missing ingredients to five items.",
+              "Include relevant safety notes for eggs, meat, fish, leftovers, and refrigeration.",
             ],
-            safetyNotes: ["string"],
-            substitutions: ["string"],
-            rescueTips: ["string"],
-            storageTips: ["string"],
-          },
-          request: sanitizeRecipeRequestForPrompt(payload),
-          mandatorySafetyNotes: fixedSafetyNotes,
-          rules: [
-            "Use 3 to 8 steps.",
-            "Missing ingredients must be optional and limited to five items.",
-            "Avoid advanced cooking terms unless immediately explained.",
-            "Mention food safety for poultry, ground meat, fish, eggs, leftovers, and refrigeration when relevant.",
-            "All times must fit the selected time limit as closely as possible.",
-          ],
-        }),
-      },
-    ]);
+          }),
+        },
+      ],
+      { timeoutMs: 55_000, maxTokens: 1_200 },
+    );
 
     const recipe = RecipeResultSchema.parse(parseModelJson(content, RecipeResultSchema));
 
