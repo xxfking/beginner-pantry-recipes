@@ -58,53 +58,52 @@ export default async function SeoPage({ params }: PageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-[#fffdf9] text-stone-950">
+    <main className="site-shell">
       <JsonLd data={buildSeoPageJsonLd(page)} />
-      <header className="border-b border-stone-200 bg-white/95">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+      <header className="site-header">
+        <div className="mx-auto grid w-full max-w-[1500px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center gap-3" aria-label="Beginner Pantry Recipes home">
-            <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-700 text-lg font-bold text-white">
-              B
-            </span>
+            <span className="brand-mark">B</span>
             <span>
-              <span className="block text-base font-semibold leading-5">{siteConfig.name}</span>
-              <span className="block text-xs font-medium text-stone-500">{siteConfig.tagline}</span>
+              <span className="block font-display text-lg font-semibold leading-5">{siteConfig.name}</span>
+              <span className="block text-[11px] font-medium text-[color:var(--muted)]">{siteConfig.tagline}</span>
             </span>
           </Link>
-          <nav className="hidden items-center gap-5 text-sm font-semibold text-stone-600 md:flex" aria-label="Main navigation">
+          <nav className="hidden items-center gap-8 text-[13px] font-semibold text-black md:flex" aria-label="Main navigation">
             {siteConfig.nav.map((item) => (
-              <Link key={item.href} href={item.href} className="transition hover:text-emerald-700">
+              <Link key={item.href} href={item.href} className="border-b border-transparent py-2 transition hover:border-black">
                 {item.label}
               </Link>
             ))}
           </nav>
+          <div className="hidden justify-end text-[13px] font-semibold text-black md:flex">EN</div>
         </div>
       </header>
 
       <article>
-        <section className="mx-auto w-full max-w-7xl px-4 pt-10 sm:px-6 lg:px-8">
+        <section className="mx-auto w-full max-w-[1500px] px-4 pt-10 sm:px-6 lg:px-8">
           <div className="max-w-4xl">
-            <h1 className="text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
+            <h1 className="display-heading text-[clamp(3rem,5vw,6rem)] text-black">
               {page.h1}
             </h1>
-            <p className="mt-4 max-w-3xl text-lg leading-8 text-stone-600">{page.intro}</p>
+            <p className="mt-6 max-w-3xl text-[17px] leading-7 text-[color:var(--muted)]">{page.intro}</p>
           </div>
         </section>
 
         <RecipeTool seedIngredients={page.seedIngredients} pageIntent={page.intent} />
 
-        <section className="mx-auto w-full max-w-5xl px-4 pb-16 sm:px-6 lg:px-8">
-          <div className="grid gap-8 border-t border-stone-200 pt-10 lg:grid-cols-[1fr_0.8fr]">
+        <section className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
+          <div className="section-rule grid gap-8 pt-10 lg:grid-cols-[1fr_0.8fr]">
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-stone-950">
+              <h2 className="font-display text-3xl font-medium text-black">
                 Beginner method for {page.keyword}
               </h2>
-              <p className="mt-4 text-base leading-8 text-stone-700">{page.promise}</p>
+              <p className="mt-4 text-base leading-8 text-[color:var(--muted)]">{page.promise}</p>
               <div className="mt-6 space-y-4">
                 {page.beginnerTips.map((tip, index) => (
-                  <div key={tip} className="rounded-lg border border-stone-200 bg-white p-4">
-                    <p className="text-sm font-semibold text-emerald-700">Step {index + 1}</p>
-                    <p className="mt-1 text-base leading-7 text-stone-700">{tip}</p>
+                  <div key={tip} className="border border-[color:var(--border-soft)] bg-[color:var(--surface)] p-4">
+                    <p className="text-sm font-semibold text-[color:var(--swedish-blue)]">Step {index + 1}</p>
+                    <p className="mt-1 text-base leading-7 text-[color:var(--muted)]">{tip}</p>
                   </div>
                 ))}
               </div>
@@ -112,10 +111,10 @@ export default async function SeoPage({ params }: PageProps) {
 
             <aside className="space-y-6">
               <div>
-                <h2 className="text-xl font-semibold tracking-tight text-stone-950">Recipe ideas</h2>
-                <ul className="mt-4 space-y-3 text-base leading-7 text-stone-700">
+                <h2 className="font-display text-2xl font-medium text-black">Recipe ideas</h2>
+                <ul className="mt-4 space-y-3 text-base leading-7 text-[color:var(--muted)]">
                   {page.recipeIdeas.map((idea) => (
-                    <li key={idea} className="rounded-lg border border-stone-200 bg-white p-3">
+                    <li key={idea} className="border border-[color:var(--border-soft)] bg-[color:var(--surface)] p-3">
                       {idea}
                     </li>
                   ))}
@@ -123,10 +122,10 @@ export default async function SeoPage({ params }: PageProps) {
               </div>
 
               <div>
-                <h2 className="text-xl font-semibold tracking-tight text-stone-950">Safety notes</h2>
-                <ul className="mt-4 space-y-3 text-base leading-7 text-stone-700">
+                <h2 className="font-display text-2xl font-medium text-black">Safety notes</h2>
+                <ul className="mt-4 space-y-3 text-base leading-7 text-[color:var(--muted)]">
                   {page.safetyFocus.map((note) => (
-                    <li key={note} className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-emerald-950">
+                    <li key={note} className="border border-[color:var(--safety-green)] bg-[#edf6ef] p-3 text-[#174b30]">
                       {note}
                     </li>
                   ))}
@@ -135,20 +134,20 @@ export default async function SeoPage({ params }: PageProps) {
             </aside>
           </div>
 
-          <section className="mt-10 border-t border-stone-200 pt-10">
-            <h2 className="text-2xl font-semibold tracking-tight text-stone-950">FAQ</h2>
+          <section className="section-rule mt-10 pt-10">
+            <h2 className="font-display text-3xl font-medium text-black">FAQ</h2>
             <div className="mt-5 grid gap-4">
               {page.faqs.map((faq) => (
-                <div key={faq.question} className="rounded-lg border border-stone-200 bg-white p-4">
-                  <h3 className="text-base font-semibold text-stone-950">{faq.question}</h3>
-                  <p className="mt-2 text-base leading-7 text-stone-700">{faq.answer}</p>
+                <div key={faq.question} className="border border-[color:var(--border-soft)] bg-[color:var(--surface)] p-4">
+                  <h3 className="text-base font-semibold text-black">{faq.question}</h3>
+                  <p className="mt-2 text-base leading-7 text-[color:var(--muted)]">{faq.answer}</p>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="mt-10 border-t border-stone-200 pt-10">
-            <h2 className="text-2xl font-semibold tracking-tight text-stone-950">More pantry searches</h2>
+          <section className="section-rule mt-10 pt-10">
+            <h2 className="font-display text-3xl font-medium text-black">More pantry searches</h2>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               {seoPages
                 .filter((related) => related.path !== page.path)
@@ -157,7 +156,7 @@ export default async function SeoPage({ params }: PageProps) {
                   <Link
                     key={related.path}
                     href={related.path}
-                    className="rounded-lg border border-stone-200 bg-white p-4 text-sm font-semibold leading-6 text-stone-800 transition hover:border-emerald-500 hover:text-emerald-800"
+                    className="border border-[color:var(--border-soft)] bg-[color:var(--surface)] p-4 text-sm font-semibold leading-6 text-black transition hover:border-[color:var(--swedish-blue)] hover:text-[color:var(--swedish-blue)]"
                   >
                     {related.h1}
                   </Link>

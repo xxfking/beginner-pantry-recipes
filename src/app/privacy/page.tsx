@@ -12,13 +12,13 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-[#fffdf9] px-4 py-12 text-stone-950 sm:px-6 lg:px-8">
+    <main className="site-shell px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-3xl">
-        <Link href="/" className="text-sm font-semibold text-emerald-700">
+        <Link href="/" className="text-sm font-semibold text-[color:var(--swedish-blue)]">
           {siteConfig.name}
         </Link>
-        <h1 className="mt-6 text-4xl font-semibold tracking-tight">Privacy Policy</h1>
-        <div className="mt-6 space-y-5 text-base leading-8 text-stone-700">
+        <h1 className="display-heading mt-6 text-5xl">Privacy Policy</h1>
+        <div className="mt-6 space-y-5 text-base leading-8 text-[color:var(--muted)]">
           <p>
             Beginner Pantry Recipes processes uploaded images and ingredient text only to analyze ingredients
             and generate recipes during the current request.

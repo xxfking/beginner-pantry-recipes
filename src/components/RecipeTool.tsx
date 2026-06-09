@@ -1,5 +1,6 @@
 "use client";
 
+import NextImage from "next/image";
 import { useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
@@ -236,38 +237,140 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
   }
 
   return (
-    <section className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8" aria-label="Recipe generator">
-      <div className="grid gap-5 lg:grid-cols-[1.05fr_0.9fr_1.05fr]">
-        <div className="surface-panel p-5">
-          <div className="mb-5 flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-semibold text-stone-950">Upload pantry photo</h2>
-              <p className="mt-1 text-sm leading-6 text-stone-600">
-                Confirm the edible ingredients before generating a recipe.
-              </p>
+    <section className="mx-auto w-full max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8" aria-label="Recipe generator">
+      <div className="mb-6 hidden gap-4 lg:grid lg:grid-cols-[1fr_auto] lg:items-end">
+        <div className="hidden lg:block" />
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[112px_132px_148px_300px_92px_190px] lg:items-end">
+          <label className="control-label">
+            Time
+            <select
+              value={timeLimit}
+              onChange={(event) => setTimeLimit(event.target.value as "10" | "20" | "30" | "45")}
+              className="field-base mt-2 h-11 w-full px-3 text-sm font-semibold"
+            >
+              {(["10", "20", "30", "45"] as const).map((value) => (
+                <option key={value} value={value}>
+                  {value} min
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="control-label">
+            Equipment
+            <select
+              value={equipment[0] || ""}
+              onChange={(event) => setEquipment(event.target.value ? [event.target.value] : [])}
+              className="field-base mt-2 h-11 w-full px-3 text-sm font-semibold capitalize"
+            >
+              {equipmentOptions.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="control-label">
+            Diet
+            <select
+              value={diet}
+              onChange={(event) => setDiet(event.target.value)}
+              className="field-base mt-2 h-11 w-full px-3 text-sm font-semibold"
+            >
+              <option value="">No preference</option>
+              {dietOptions.filter(Boolean).map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div>
+            <span className="control-label">Skill level</span>
+            <div className="mt-2 grid h-11 grid-cols-3 border border-[color:var(--border-soft)]">
+              {skillOptions.map((option) => (
+                <button
+                  type="button"
+                  key={option.value}
+                  onClick={() => setSkillLevel(option.value)}
+                  className={
+                    skillLevel === option.value
+                      ? "bg-[color:var(--swedish-blue)] text-xs font-semibold text-white"
+                      : "border-l border-[color:var(--border-soft)] bg-[color:var(--surface)] text-xs font-semibold text-black first:border-l-0"
+                  }
+                >
+                  {option.label}
+                </button>
+              ))}
             </div>
-            <Camera className="h-6 w-6 text-emerald-700" aria-hidden="true" />
+          </div>
+          <label className="control-label">
+            Servings
+            <input
+              type="number"
+              min={1}
+              max={8}
+              value={servings}
+              onChange={(event) => setServings(Number(event.target.value))}
+              className="field-base mt-2 h-11 w-full px-3 text-sm font-semibold"
+            />
+          </label>
+          <button
+            type="button"
+            onClick={handleGenerate}
+            disabled={ingredients.length === 0 || isGenerating}
+            className="primary-button h-11 bg-[color:var(--action-red)] hover:bg-[#a81927] disabled:cursor-not-allowed disabled:bg-[#b9b3aa]"
+          >
+            {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            Generate beginner recipe
+          </button>
+        </div>
+      </div>
+
+      <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr_1.15fr]">
+        <div className="surface-panel p-5 lg:border-r-0">
+          <div className="mb-5 flex items-start justify-between gap-4">
+            <div className="flex items-baseline gap-4">
+              <span className="panel-number">01</span>
+              <div>
+                <h2 className="panel-kicker">Upload pantry photo</h2>
+                <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
+                  Confirm the edible ingredients before generating a recipe.
+                </p>
+              </div>
+            </div>
+            <Camera className="h-5 w-5 text-[color:var(--swedish-blue)]" aria-hidden="true" />
           </div>
 
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex min-h-40 w-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-emerald-300 bg-emerald-50/70 px-4 text-center transition hover:border-emerald-500 hover:bg-emerald-50"
+            className="pantry-photo relative block min-h-[248px] w-full overflow-hidden text-center"
           >
             {imagePreview ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={imagePreview}
-                alt="Compressed pantry upload preview"
-                className="h-36 w-full rounded-md object-cover"
-              />
+              <img src={imagePreview} alt="Compressed pantry upload preview" className="h-full w-full object-cover" />
             ) : (
               <>
-                <Upload className="h-8 w-8 text-emerald-700" aria-hidden="true" />
-                <span className="text-sm font-semibold text-emerald-950">PNG, JPG, or WebP under 7MB after compression</span>
+                <NextImage
+                  src="/pantry-still-life.webp"
+                  alt="Rice, eggs, carrots, herbs, garlic, and oats on a light table"
+                  fill
+                  sizes="(min-width: 1024px) 34vw, 100vw"
+                  className="object-cover"
+                  priority
+                />
+                <span className="pantry-photo-overlay">
+                  <span className="upload-tile transition hover:border-[color:var(--swedish-blue)] hover:text-[color:var(--swedish-blue)]">
+                    <Upload className="h-5 w-5" aria-hidden="true" />
+                    Add photo
+                  </span>
+                </span>
               </>
             )}
           </button>
+          <p className="mt-2 text-center text-xs font-medium text-[color:var(--muted)]">
+            PNG, JPG, or WebP up to 7MB after compression
+          </p>
           <input
             ref={fileInputRef}
             type="file"
@@ -286,7 +389,7 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
             }}
           />
 
-          <label className="mt-5 block text-sm font-semibold text-stone-900" htmlFor="manual-ingredients">
+          <label className="mt-5 block text-xs font-semibold uppercase text-[color:var(--muted)]" htmlFor="manual-ingredients">
             Add ingredients
           </label>
           <textarea
@@ -294,7 +397,7 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
             value={manualText}
             onChange={(event) => setManualText(event.target.value)}
             rows={4}
-            className="mt-2 w-full rounded-lg border border-stone-200 bg-white px-3 py-3 text-sm leading-6 text-stone-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+            className="field-base mt-2 w-full px-3 py-3 text-sm leading-6"
             placeholder="chicken, rice, eggs, frozen peas"
           />
 
@@ -303,7 +406,7 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
               type="button"
               onClick={handleAnalyze}
               disabled={isAnalyzing}
-              className="primary-button bg-emerald-700 hover:bg-emerald-800"
+              className="primary-button bg-[color:var(--swedish-blue)] hover:bg-[color:var(--swedish-blue-2)]"
             >
               {isAnalyzing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               Analyze ingredients
@@ -314,21 +417,24 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
           </div>
 
           {notes.length > 0 ? (
-            <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-3 text-sm text-emerald-900">
+            <div className="mt-4 border border-[color:var(--safety-green)] bg-[#edf6ef] px-3 py-3 text-sm text-[#174b30]">
               {notes[0]}
             </div>
           ) : null}
         </div>
 
-        <div className="surface-panel p-5">
+        <div className="surface-panel p-5 lg:border-r-0">
           <div className="mb-5 flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-semibold text-stone-950">Confirm ingredients</h2>
-              <p className="mt-1 text-sm leading-6 text-stone-600">
-                Remove uncertain items and add missing pantry staples.
-              </p>
+            <div className="flex items-baseline gap-4">
+              <span className="panel-number">02</span>
+              <div>
+                <h2 className="panel-kicker">Confirm ingredients</h2>
+                <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
+                  Remove uncertain items and add missing pantry staples.
+                </p>
+              </div>
             </div>
-            <CheckCircle2 className="h-6 w-6 text-emerald-700" aria-hidden="true" />
+            <CheckCircle2 className="h-5 w-5 text-[color:var(--safety-green)]" aria-hidden="true" />
           </div>
 
           <div className="flex gap-2">
@@ -341,7 +447,7 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
                   addIngredient();
                 }
               }}
-              className="min-w-0 flex-1 rounded-lg border border-stone-200 px-3 py-2 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+              className="field-base min-w-0 flex-1 px-3 py-2 text-sm"
               placeholder="Add one item"
             />
             <button type="button" onClick={addIngredient} className="icon-button" aria-label="Add ingredient">
@@ -354,19 +460,21 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
               ingredients.map((ingredient, index) => (
                 <div
                   key={`${ingredient.name}-${index}`}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-stone-200 bg-white px-3 py-2"
+                  className="grid grid-cols-[18px_1fr_auto_auto] items-center gap-3 border border-[color:var(--border-soft)] bg-[color:var(--surface)] px-3 py-2"
                 >
+                  <span className="h-3.5 w-3.5 border border-[color:var(--swedish-blue)] bg-[color:var(--swedish-blue)]" />
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-stone-950">{ingredient.name}</p>
-                    <p className="text-xs text-stone-500">
-                      {ingredient.source} · {Math.round(ingredient.confidence * 100)}%
-                      {ingredient.needsConfirmation ? " · confirm" : ""}
+                    <p className="truncate text-sm font-semibold text-black">{ingredient.name}</p>
+                    <p className="text-xs text-[color:var(--muted)]">
+                      {ingredient.source} | {ingredient.category}
+                      {ingredient.needsConfirmation ? " | confirm" : ""}
                     </p>
                   </div>
+                  <span className="confidence-pill">{Math.round(ingredient.confidence * 100)}%</span>
                   <button
                     type="button"
                     onClick={() => removeIngredient(index)}
-                    className="rounded-md p-2 text-stone-500 transition hover:bg-red-50 hover:text-red-700"
+                    className="p-2 text-[color:var(--muted)] transition hover:bg-[#f8e9e9] hover:text-[color:var(--action-red)]"
                     aria-label={`Remove ${ingredient.name}`}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -374,16 +482,16 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
                 </div>
               ))
             ) : (
-              <div className="rounded-lg border border-stone-200 bg-stone-50 px-3 py-6 text-center text-sm text-stone-600">
+              <div className="border border-[color:var(--border-soft)] bg-[color:var(--surface-muted)] px-3 py-6 text-center text-sm text-[color:var(--muted)]">
                 Add ingredients or analyze a photo.
               </div>
             )}
           </div>
 
-          <div className="mt-6 space-y-4 border-t border-stone-200 pt-5">
+          <div className="mt-6 space-y-4 border-t border-[color:var(--border-soft)] pt-5">
             <div>
-              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-stone-900">
-                <Clock3 className="h-4 w-4 text-emerald-700" />
+              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-black">
+                <Clock3 className="h-4 w-4 text-[color:var(--swedish-blue)]" />
                 Time limit
               </div>
               <div className="grid grid-cols-4 gap-2">
@@ -401,8 +509,8 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
             </div>
 
             <div>
-              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-stone-900">
-                <Utensils className="h-4 w-4 text-emerald-700" />
+              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-black">
+                <Utensils className="h-4 w-4 text-[color:var(--swedish-blue)]" />
                 Equipment
               </div>
               <div className="flex flex-wrap gap-2">
@@ -420,12 +528,12 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="text-sm font-semibold text-stone-900">
+              <label className="text-sm font-semibold text-black">
                 Diet
                 <select
                   value={diet}
                   onChange={(event) => setDiet(event.target.value)}
-                  className="mt-2 w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm font-normal outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                  className="field-base mt-2 w-full px-3 py-2 text-sm font-normal"
                 >
                   <option value="">No diet filter</option>
                   {dietOptions.filter(Boolean).map((option) => (
@@ -435,7 +543,7 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
                   ))}
                 </select>
               </label>
-              <label className="text-sm font-semibold text-stone-900">
+              <label className="text-sm font-semibold text-black">
                 Servings
                 <input
                   type="number"
@@ -443,17 +551,17 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
                   max={8}
                   value={servings}
                   onChange={(event) => setServings(Number(event.target.value))}
-                  className="mt-2 w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm font-normal outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                  className="field-base mt-2 w-full px-3 py-2 text-sm font-normal"
                 />
               </label>
             </div>
 
-            <label className="block text-sm font-semibold text-stone-900">
+            <label className="block text-sm font-semibold text-black">
               Allergies
               <input
                 value={allergies}
                 onChange={(event) => setAllergies(event.target.value)}
-                className="mt-2 w-full rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm font-normal outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                className="field-base mt-2 w-full px-3 py-2 text-sm font-normal"
                 placeholder="peanuts, shellfish, dairy"
               />
             </label>
@@ -475,28 +583,31 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
 
         <div className="surface-panel p-5">
           <div className="mb-5 flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-semibold text-stone-950">Step-by-step recipe</h2>
-              <p className="mt-1 text-sm leading-6 text-stone-600">
-                Built for simple moves, clear cues, and food safety.
-              </p>
+            <div className="flex items-baseline gap-4">
+              <span className="panel-number">03</span>
+              <div>
+                <h2 className="panel-kicker">Step-by-step recipe</h2>
+                <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
+                  Built for simple moves, clear cues, and food safety.
+                </p>
+              </div>
             </div>
-            <ShieldCheck className="h-6 w-6 text-emerald-700" aria-hidden="true" />
+            <ShieldCheck className="h-5 w-5 text-[color:var(--safety-green)]" aria-hidden="true" />
           </div>
 
           {pageIntent ? (
-            <div className="mb-4 rounded-lg border border-stone-200 bg-stone-50 px-3 py-3 text-sm text-stone-700">
+            <div className="mb-4 border border-[color:var(--border-soft)] bg-[color:var(--surface-muted)] px-3 py-3 text-sm text-[color:var(--muted)]">
               {pageIntent}
             </div>
           ) : null}
 
           {error ? (
-            <div className="mb-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-800">
+            <div className="mb-4 flex items-start gap-2 border border-[color:var(--action-red)] bg-[#fff1f0] px-3 py-3 text-sm text-[color:var(--action-red)]">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
               <p>{error}</p>
               <button
                 type="button"
-                className="ml-auto rounded p-0.5 text-red-700 hover:bg-red-100"
+                className="ml-auto p-0.5 text-[color:var(--action-red)] hover:bg-[#f8e9e9]"
                 onClick={() => setError("")}
                 aria-label="Dismiss error"
               >
@@ -509,7 +620,7 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
             type="button"
             onClick={handleGenerate}
             disabled={ingredients.length === 0 || isGenerating}
-            className="primary-button w-full bg-red-600 hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-stone-300"
+            className="primary-button w-full bg-[color:var(--action-red)] hover:bg-[#a81927] disabled:cursor-not-allowed disabled:bg-[#b9b3aa]"
           >
             {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
             Generate beginner recipe
@@ -518,22 +629,22 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
           {result ? (
             <article className="mt-5 space-y-5">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">
-                  {result.difficulty} · {result.prepTime} prep · {result.cookTime} cook
+                <p className="text-xs font-semibold uppercase text-[color:var(--swedish-blue)]">
+                  {result.difficulty} | {result.prepTime} prep | {result.cookTime} cook
                 </p>
-                <h3 className="mt-2 text-2xl font-semibold tracking-tight text-stone-950">
+                <h3 className="mt-2 font-display text-3xl font-medium leading-tight text-black">
                   {result.title}
                 </h3>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-lg border border-stone-200 bg-white p-3">
-                  <p className="text-sm font-semibold text-stone-950">Used ingredients</p>
-                  <p className="mt-1 text-sm leading-6 text-stone-600">{result.usedIngredients.join(", ")}</p>
+                <div className="border border-[color:var(--border-soft)] bg-[color:var(--surface)] p-3">
+                  <p className="text-sm font-semibold text-black">Used ingredients</p>
+                  <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">{result.usedIngredients.join(", ")}</p>
                 </div>
-                <div className="rounded-lg border border-stone-200 bg-white p-3">
-                  <p className="text-sm font-semibold text-stone-950">Missing one ingredient</p>
-                  <p className="mt-1 text-sm leading-6 text-stone-600">
+                <div className="border border-[color:var(--border-soft)] bg-[color:var(--surface)] p-3">
+                  <p className="text-sm font-semibold text-black">Missing one ingredient</p>
+                  <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
                     {result.missingIngredients.length ? result.missingIngredients.join(", ") : "None required"}
                   </p>
                 </div>
@@ -541,29 +652,29 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
 
               <ol className="space-y-3">
                 {result.steps.map((step, index) => (
-                  <li key={`${step.title}-${index}`} className="rounded-lg border border-stone-200 bg-white p-3">
+                  <li key={`${step.title}-${index}`} className="border border-[color:var(--border-soft)] bg-[color:var(--surface)] p-3">
                     <div className="flex items-start gap-3">
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-sm font-semibold text-white">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center bg-[color:var(--swedish-blue)] text-sm font-semibold text-white">
                         {index + 1}
                       </span>
                       <div>
-                        <p className="font-semibold text-stone-950">
-                          {step.title} · {step.timeMinutes}m
+                        <p className="font-semibold text-black">
+                          {step.title} | {step.timeMinutes}m
                         </p>
-                        <p className="mt-1 text-sm leading-6 text-stone-700">{step.detail}</p>
-                        <p className="mt-2 text-sm font-medium text-emerald-800">{step.beginnerCue}</p>
+                        <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">{step.detail}</p>
+                        <p className="mt-2 text-sm font-semibold text-[color:var(--swedish-blue)]">{step.beginnerCue}</p>
                       </div>
                     </div>
                   </li>
                 ))}
               </ol>
 
-              <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
-                <p className="flex items-center gap-2 text-sm font-semibold text-emerald-950">
+              <div className="border border-[color:var(--safety-green)] bg-[#edf6ef] p-3">
+                <p className="flex items-center gap-2 text-sm font-semibold text-[#174b30]">
                   <ShieldCheck className="h-4 w-4" />
                   Safety notes
                 </p>
-                <ul className="mt-2 space-y-1 text-sm leading-6 text-emerald-900">
+                <ul className="mt-2 space-y-1 text-sm leading-6 text-[#174b30]">
                   {result.safetyNotes.map((note) => (
                     <li key={note}>{note}</li>
                   ))}
@@ -572,16 +683,16 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <p className="text-sm font-semibold text-stone-950">Substitutions</p>
-                  <ul className="mt-2 space-y-1 text-sm leading-6 text-stone-600">
+                  <p className="text-sm font-semibold text-black">Substitutions</p>
+                  <ul className="mt-2 space-y-1 text-sm leading-6 text-[color:var(--muted)]">
                     {result.substitutions.map((tip) => (
                       <li key={tip}>{tip}</li>
                     ))}
                   </ul>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-stone-950">Rescue tips</p>
-                  <ul className="mt-2 space-y-1 text-sm leading-6 text-stone-600">
+                  <p className="text-sm font-semibold text-black">Rescue tips</p>
+                  <ul className="mt-2 space-y-1 text-sm leading-6 text-[color:var(--muted)]">
                     {result.rescueTips.map((tip) => (
                       <li key={tip}>{tip}</li>
                     ))}
@@ -590,9 +701,9 @@ export function RecipeTool({ seedIngredients = [], pageIntent }: RecipeToolProps
               </div>
             </article>
           ) : (
-            <div className="mt-5 rounded-lg border border-stone-200 bg-stone-50 p-5">
-              <p className="text-sm font-semibold text-stone-950">Ready when your ingredient list is confirmed.</p>
-              <p className="mt-2 text-sm leading-6 text-stone-600">
+            <div className="mt-5 border border-[color:var(--border-soft)] bg-[color:var(--surface-muted)] p-5">
+              <p className="text-sm font-semibold text-black">Ready when your ingredient list is confirmed.</p>
+              <p className="mt-2 text-sm leading-6 text-[color:var(--muted)]">
                 The result will include used ingredients, optional staples, steps, safety notes, substitutions,
                 rescue tips, and storage tips.
               </p>
